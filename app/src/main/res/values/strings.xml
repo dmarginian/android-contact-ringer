@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Contact Ringer</string>
+    <string name="enabled">Enabled</string>
+    <string name="ringer_mode_before_increase">RingerModeBeforeIncrease</string>
+    <string name="ringer_volume_before_increase">RingerVolumeBeforeIncrease</string>
+    <string name="ringer_volume_percent">RingerVolumePercent</string>
+    <string name="pref_name">ContactRingerPrefs</string>
+    <string name="all_contacts">All contacts</string>
+    <string name="favorites_only">Favorites/Starred only</string>
+    <string name="ringer_label">Ringer Volume for my contacts:</string>
+    <string name="increase_volume_for_label">Increase volume for:</string>
+</resources>

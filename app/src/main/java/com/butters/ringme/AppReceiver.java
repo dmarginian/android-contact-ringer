@@ -6,12 +6,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.provider.ContactsContract;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class AppReceiver extends BroadcastReceiver {
 
@@ -48,18 +46,24 @@ public class AppReceiver extends BroadcastReceiver {
    * @return
    */
   private boolean doesContactExistForIncomingCall(Context context, String incomingNumber, SharedPreferences settings) {
-    incomingNumber = cleanPhoneNumber(incomingNumber);
-    StringBuffer selectionClause = new StringBuffer("substr(" + ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER + ",-10, 10) =?");
-    List<String> selectionClauseArgs = new ArrayList();
-    selectionClauseArgs.add(incomingNumber);
+    String[] projections = {
+        ContactsContract.PhoneLookup.STARRED,
+    };
+    Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(incomingNumber));
+    Cursor contacts = context.getContentResolver().query(uri, projections, null, null, null);
+    boolean contactForIncomingCallExists = false;
     boolean allContacts = settings.getBoolean(context.getString(R.string.all_contacts), true);
     if (!allContacts) {
-      selectionClause.append(" AND starred=?");
-      selectionClauseArgs.add("1");
+      while (contacts.moveToNext()) {
+       short starred = contacts.getShort(contacts.getColumnIndex(ContactsContract.PhoneLookup.STARRED));
+       if (starred == 1) {
+         contactForIncomingCallExists = true;
+         break;
+       }
+      }
+    } else {
+      contactForIncomingCallExists = contacts.getCount() > 0;
     }
-    String[] projections = { ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER };
-    Cursor contacts = context.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, projections, selectionClause.toString(), selectionClauseArgs.toArray(new String[selectionClauseArgs.size()]), null);
-    boolean contactForIncomingCallExists = contacts.getCount() > 0;
     contacts.close();
     return contactForIncomingCallExists;
   }
@@ -121,13 +125,4 @@ public class AppReceiver extends BroadcastReceiver {
     audioManager.setStreamVolume(AudioManager.STREAM_RING, ringerVolume, 0);
   }
 
-  /**
-   * Removes all special characters from a phone number.
-   *
-   * @param numberIn
-   * @return
-   */
-  private String cleanPhoneNumber(String numberIn) {
-    return numberIn.replaceAll("[\\D]", "");
-  }
 }

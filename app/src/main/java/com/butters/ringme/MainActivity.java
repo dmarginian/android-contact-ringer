@@ -97,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
     this.allContactsRadio = (RadioButton) findViewById(R.id.radio_all_contacts);
     boolean allContacts = settings.getBoolean(getString(R.string.all_contacts), true);
     allContactsRadio.setChecked(allContacts);
-
   }
 
   public void onRadioButtonClicked(View view) {
